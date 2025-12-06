@@ -75,3 +75,13 @@ vim.keymap.set("n", "<leader>so", function()
     vim.cmd("so")
 end)
 
+ -- 1. Window Navigation with <leader> + h/j/k/l
+vim.keymap.set('n', '<leader>h', '<C-w>h', { desc = 'Move to left window' })
+vim.keymap.set('n', '<leader>j', '<C-w>j', { desc = 'Move to lower window' })
+vim.keymap.set('n', '<leader>k', '<C-w>k', { desc = 'Move to upper window' })
+vim.keymap.set('n', '<leader>l', '<C-w>l', { desc = 'Move to right window' })
+
+-- 2. Resize Width (Vertical) with + and -
+-- Note: This overrides default behavior of + (next line) and - (prev line)
+vim.keymap.set('n', '+', '<cmd>vertical resize +5<CR>', { desc = 'Increase window width' })
+vim.keymap.set('n', '-', '<cmd>vertical resize -5<CR>', { desc = 'Decrease window width' })

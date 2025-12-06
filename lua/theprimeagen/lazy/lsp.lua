@@ -11,8 +11,6 @@ local root_files = {
 
 return {
 
-    {"nvim-java/nvim-java"},
-
     {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -34,7 +32,6 @@ return {
             formatters_by_ft = {
             }
         })
-        require('java').setup()
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
         local capabilities = vim.tbl_deep_extend(
@@ -49,7 +46,6 @@ return {
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
-                "java",
                 "gopls",
             },
             handlers = {

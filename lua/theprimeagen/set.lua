@@ -29,3 +29,9 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
+
+
+-- Fix for the "Background Color Erase" (BCE) issue
+-- This forces Neovim to clear the background with specific colors
+-- rather than the terminal's default background code.
+vim.cmd([[let &t_ut='']])
