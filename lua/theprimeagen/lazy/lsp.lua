@@ -50,7 +50,6 @@ return {
                 "lua_ls",
                 "rust_analyzer",
                 "java",
-                "gopls",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
