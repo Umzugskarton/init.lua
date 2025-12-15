@@ -46,16 +46,16 @@ autocmd({"BufWritePre"}, {
     command = [[%s/\s\+$//e]],
 })
 
-autocmd('BufEnter', {
-    group = ThePrimeagenGroup,
-    callback = function()
-        if vim.bo.filetype == "zig" then
-            vim.cmd.colorscheme("rose-pine-moon")
-        else
-            vim.cmd.colorscheme("citruszest")
-        end
-    end
-})
+-- autocmd('BufEnter', {
+--     group = ThePrimeagenGroup,
+--     callback = function()
+--         if vim.bo.filetype == "zig" then
+--             vim.cmd.colorscheme("rose-pine-moon")
+--         else
+--             vim.cmd.colorscheme("citruszest")
+--         end
+--     end
+-- })
 
 
 autocmd('LspAttach', {
@@ -78,3 +78,75 @@ autocmd('LspAttach', {
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
+
+
+local autocmd = vim.api.nvim_create_autocmd
+
+-- Return to the last position.
+-- @returns a "clear = true" augroup
+local function augroup(name) return vim.api.nvim_create_augroup('sergio-lazyvim_' .. name, { clear = true }) end
+
+autocmd('BufReadPost', {
+  group = augroup('restore_position'),
+  callback = function()
+    local exclude = { 'gitcommit' }
+    local buf = vim.api.nvim_get_current_buf()
+    if vim.tbl_contains(exclude, vim.bo[buf].filetype) then return end
+
+    local mark = vim.api.nvim_buf_get_mark(buf, '"')
+    local line_count = vim.api.nvim_buf_line_count(buf)
+    if mark[1] > 0 and mark[1] <= line_count then
+      pcall(vim.api.nvim_win_set_cursor, 0, mark)
+      vim.api.nvim_feedkeys('zvzz', 'n', true)
+    end
+  end,
+  desc = 'Restore cursor position after reopening file',
+})
+
+
+-- =============================================================================
+-- DIRECT TERMINAL ESCAPE SEQUENCE MODE (BRUTE FORCE)
+-- =============================================================================
+
+-- 1. Get Colors (Global Truth)
+local orange = os.getenv("CURSOR_RETRO_ORANGE") or "#ff9900"
+local pink   = os.getenv("CURSOR_RETRO_PINK")   or "#d700ff"
+
+-- 2. Define the exact Escape Sequences (Same as in Zsh)
+--    \27 is Lua for \033 (Escape)
+--    OSC 12 changes cursor color
+local orange_cursor_cmd = "\27]12;" .. orange .. "\7"
+local pink_cursor_cmd   = "\27]12;" .. pink   .. "\7"
+
+-- 3. Function to write directly to the terminal (Instant, no flicker)
+local function set_cursor_color(color_cmd)
+    -- Write to stderr to bypass Neovim's UI buffer
+    vim.api.nvim_chan_send(2, color_cmd)
+end
+
+-- 4. Hook into the ModeChanged Event
+local mode_group = vim.api.nvim_create_augroup("RetroCursorDirect", { clear = true })
+
+vim.api.nvim_create_autocmd("ModeChanged", {
+    group = mode_group,
+    callback = function()
+        local mode = vim.v.event.new_mode
+        -- 'i' is insert, 'R' is replace
+        if mode:sub(1,1) == "i" or mode == "R" then
+            set_cursor_color(orange_cursor_cmd)
+        else
+            set_cursor_color(pink_cursor_cmd)
+        end
+    end
+})
+
+-- 5. Ensure we start with Orange (Normal Mode)
+set_cursor_color(orange_cursor_cmd)
+
+-- 6. Cleanup on Exit (Return to Orange or Default)
+vim.api.nvim_create_autocmd("VimLeave", {
+    group = mode_group,
+    callback = function()
+        set_cursor_color(orange_cursor_cmd)
+end
+})

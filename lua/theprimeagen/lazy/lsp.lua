@@ -14,6 +14,7 @@ return {
     {
     "neovim/nvim-lspconfig",
     dependencies = {
+        "nvim-java/nvim-java",
         "stevearc/conform.nvim",
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
@@ -28,6 +29,7 @@ return {
     },
 
     config = function()
+        require('java').setup()
         require("conform").setup({
             formatters_by_ft = {
             }
@@ -41,11 +43,20 @@ return {
             cmp_lsp.default_capabilities())
 
         require("fidget").setup({})
-        require("mason").setup()
+        require("mason").setup({
+                opts = {
+                    ui = {
+                        border = "rounded",
+                    }
+                }
+            })
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
+                "jdtls",
+                "angularls",
+                "ts_ls",
                 "gopls",
             },
             handlers = {
@@ -109,6 +120,7 @@ return {
             }),
             sources = cmp.config.sources({
                 { name = "copilot", group_index = 2 },
+                { name = 'orgmode'},
                 { name = 'nvim_lsp' },
                 { name = 'luasnip' }, -- For luasnip users.
             }, {

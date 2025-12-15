@@ -1,10 +1,34 @@
 return {
   'tpope/vim-projectionist',
   config = function()
-    -- This table defines project-type detection rules.
-    -- The key "angular.json" means: "If you find an 'angular.json'
-    -- in the project root, apply the following rules."
     vim.g.projectionist_heuristics = {
+
+      -- [[ 1. Java / Spring Boot Rules ]] --
+      -- These trigger only if pom.xml or build.gradle exists
+      ["pom.xml|build.gradle"] = {
+
+        -- Navigate from Source Code -> Test
+        ["src/main/java/*.java"] = {
+          type = "source",
+          alternate = "src/test/java/{}Test.java",
+        },
+
+        -- Navigate from Test -> Source Code
+        ["src/test/java/*Test.java"] = {
+          type = "test",
+          alternate = "src/main/java/{}.java",
+        },
+
+        -- Quick access to resources like application.properties
+        ["src/main/resources/*.properties"] = {
+          type = "resource"
+        },
+        ["src/main/resources/*.yaml"] = {
+          type = "resource"
+        }
+      },
+
+      -- [[ 2. Angular / Global Rules ]] --
       ["*"] = {
         ["*.component.ts"] = {
           type = "component",
@@ -62,13 +86,6 @@ return {
             "{}.pipe.ts",
           }
         }
-        -- You can add more rules here for services, modules, etc.
-        -- ["src/app/**/*.service.ts"] = {
-        --   alternate = "{}.service.spec.ts"
-        -- },
-        -- ["src/app/**/*.service.spec.ts"] = {
-        --   alternate = "{}.service.ts"
-        -- }
       }
     }
   end
