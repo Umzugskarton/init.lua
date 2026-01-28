@@ -150,3 +150,31 @@ vim.api.nvim_create_autocmd("VimLeave", {
         set_cursor_color(orange_cursor_cmd)
 end
 })
+
+local function jump_to_next_placeholder()
+    -- The marker we are looking for
+    local marker = "<++>"
+
+    -- Search for the marker
+    -- 'W' = don't wrap around file
+    local found = vim.fn.search(marker, "W")
+
+    if found > 0 then
+        -- If found, delete the marker and enter Insert mode
+        -- "cf>" means: Change (c) until find (f) the character '>'
+        -- Adjust this based on your marker length.
+        -- For <++>, we can just use "4s" (substitute 4 chars) or "cf>"
+        vim.cmd("normal! cf>")
+    else
+        print("✅ No more placeholders found.")
+    end
+end
+
+-- Map it to <Tab> (only in Org files)
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "org",
+    callback = function()
+        -- Buffer-local mapping
+        vim.keymap.set("n", "<Tab>", jump_to_next_placeholder, { buffer = true, desc = "Jump to next <++>" })
+    end,
+})
